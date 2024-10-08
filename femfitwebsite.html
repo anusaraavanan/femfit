@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+        .login-container, .question-container, .menstrual-details {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+        input[type="email"], input[type="password"], select, input[type="date"] {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        .question-container, .menstrual-details {
+            display: none;
+        }
+        .color-option {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            margin-right: 5px;
+        }
+        .custom-select {
+            position: relative;
+            display: inline-block;
+            width: 100%;
+        }
+        .select-selected {
+            background-color: #fff;
+            border: 1px solid #ccc;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+        }
+        .select-items {
+            position: absolute;
+            background-color: #fff;
+            border: 1px solid #ccc;
+            z-index: 99;
+            border-radius: 5px;
+            width: 100%;
+            display: none;
+        }
+        .select-items div {
+            padding: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+        }
+        .select-items div:hover {
+            background-color: #f0f0f0;
+        }
+        .color-image {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            margin-right: 5px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="login-container">
+        <h2>Login</h2>
+        <form id="loginForm">
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" placeholder="Enter your email" required>
+            
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" placeholder="Enter your password" required>
+            
+            <button type="submit">Submit</button>
+        </form>
+        <p id="message"></p>
+    </div>
+
+    <!-- Question section (hidden by default) -->
+    <div class="question-container" id="questionContainer">
+        <h3>Health Questions</h3>
+        <form id="questionForm">
+            <label for="cycle">Are you tracking your menstrual cycle or pregnancy?</label>
+            <select id="cycle" name="cycle">
+                <option value="menstrual">Menstrual Cycle</option>
+                <option value="pregnancy">Pregnancy</option>
+            </select>
+
+            <button type="submit">Submit Answers</button>
+        </form>
+        <p id="responseMessage"></p>
+    </div>
+
+    <!-- Menstrual details section (hidden by default) -->
+    <div class="menstrual-details" id="menstrualDetails">
+        <h3>Menstrual Cycle Details</h3>
+        <form id="menstrualForm">
+            <label for="startDate">Start Date:</label>
+            <input type="date" id="startDate" name="startDate" required>
+
+            <label for="endDate">End Date:</label>
+            <input type="date" id="endDate" name="endDate" required>
+
+            <label for="days">Duration (Days):</label>
+            <input type="number" id="days" name="days" required>
+
+            <label for="bloodColor">Blood Color:</label>
+            <div class="custom-select">
+                <div class="select-selected">Select Blood Color</div>
+                <div class="select-items" id="bloodColorOptions">
+                    <!-- Options will be added here dynamically -->
+                </div>
+            </div>
+
+            <label for="flowType">Flow Type:</label>
+            <select id="flowType" name="flowType">
+                <option value="normal">Normal Flow</option>
+                <option value="clot">Clot</option>
+            </select>
+
+            <label for="clotDays">If Clot, How Many Days?</label>
+            <input type="number" id="clotDays" name="clotDays" placeholder="Number of days" disabled>
+
+            <button type="submit">Submit Menstrual Details</button>
+        </form>
+        <p id="menstrualResponseMessage"></p>
+    </div>
+
+    <script>
+        // Custom dropdown for blood color
+        const bloodColors = {
+            brightRed: 'https://via.placeholder.com/20/FF0000/FFFFFF?text=+',
+            darkRed: 'https://via.placeholder.com/20/8B0000/FFFFFF?text=+',
+            darkBrown: 'https://via.placeholder.com/20/654321/FFFFFF?text=+',
+            grey: 'https://via.placeholder.com/20/808080/FFFFFF?text=+',
+            black: 'https://via.placeholder.com/20/000000/FFFFFF?text=+',
+            lightPink: 'https://via.placeholder.com/20/FFB6C1/FFFFFF?text=+',
+            orange: 'https://via.placeholder.com/20/FFA500/FFFFFF?text=+'
+        };
+
+        // Populate custom dropdown
+        const bloodColorOptionsDiv = document.getElementById('bloodColorOptions');
+        for (const color in bloodColors) {
+            const optionDiv = document.createElement('div');
+            optionDiv.innerHTML = `<img class="color-image" src="${bloodColors[color]}" alt="${color}">${color.replace(/([A-Z])/g, ' $1')}`;
+            optionDiv.onclick = function() {
+                document.querySelector('.select-selected').innerHTML = optionDiv.innerHTML;
+                document.querySelector('.select-items').style.display = 'none'; // Hide dropdown
+                document.getElementById('bloodColor').value = color; // Set hidden value
+            };
+            bloodColorOptionsDiv.appendChild(optionDiv);
+        }
+
+        // Toggle the dropdown visibility
+        document.querySelector('.select-selected').addEventListener('click', function() {
+            const items = document.querySelector('.select-items');
+            items.style.display = items.style.display === 'block' ? 'none' : 'block';
+        });
+
+        document.addEventListener('click', function(event) {
+            if (!event.target.closest('.custom-select')) {
+                document.querySelector('.select-items').style.display = 'none'; // Hide dropdown if clicked outside
+            }
+        });
+
+        document.getElementById('loginForm').addEventListener('submit', function(event) {
+            event.preventDefault(); // Prevent page reload on submit
+
+            // Get the values from the form fields
+            var email = document.getElementById('email').value;
+            var password = document.getElementById('password').value;
+
+            // Display a message confirming email and password input
+            document.getElementById('message').textContent = `Email: ${email}, Password: ${password}`;
+
+            // Hide the login form and show the questions section
+            document.querySelector('.login-container').style.display = 'none';
+            document.getElementById('questionContainer').style.display = 'block';
+        });
+
+        document.getElementById('questionForm').addEventListener('submit', function(event) {
+            event.preventDefault(); // Prevent page reload on submit
+
+            // Get the selected cycle (menstrual or pregnancy)
+            var cycle = document.getElementById('cycle').value;
+
+            // Display a response based on user selection
+            if (cycle === 'menstrual') {
+                document.getElementById('responseMessage').textContent = 'You selected Menstrual Cycle. Please provide more details.';
+                document.getElementById('questionContainer').style.display = 'none';
+                document.getElementById('menstrualDetails').style.display = 'block';
+            } else {
+                document.getElementById('responseMessage').textContent = 'You selected Pregnancy. We will provide you with relevant questions.';
+            }
+        });
+
+        // Enable/disable clotDays input based on flow type selection
+        document.getElementById('flowType').addEventListener('change', function() {
+            const clotDaysInput = document.getElementById('clotDays');
+            clotDaysInput.disabled = this.value !== 'clot'; // Enable if "Clot" is selected
+        });
+
+        document.getElementById('menstrualForm').addEventListener('submit', function(event) {
+            event.preventDefault(); // Prevent page reload on submit
+
+            // Collect and display menstrual details
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            const duration = document.getElementById('days').value;
+            const bloodColor = document.getElementById('bloodColor').value;
+            const flowType = document.getElementById('flowType').value;
+            const clotDays = document.getElementById('clotDays').value;
+
+            // Display the collected information
+            let detailsMessage = `Start Date: ${startDate}, End Date: ${endDate}, Duration: ${duration} days, Blood Color: ${bloodColor}, Flow Type: ${flowType}`;
+            if (flowType === 'clot') {
+                detailsMessage += `, Clot Days: ${clotDays}`;
+            }
+
+            document.getElementById('menstrualResponseMessage').textContent = detailsMessage;
+        });
+    </script>
+
+</body>
+</html>
